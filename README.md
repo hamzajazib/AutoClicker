@@ -77,7 +77,7 @@ Unlock advanced features:
   <img src="https://capsule-render.vercel.app/api?type=rect&color=2f6fff&height=120&section=header&text=🚀%20Get%20ZClicker%20Pro&fontSize=58&fontColor=ffffff&animation=fadeIn" width="700"/>
 </a>
 
-*Warning: When running AutoClicker.exe a Blue Window Might Popup.* \
+*Warning: When running AutoClicker.exe or zClicker.exe a Blue Window Might Popup.* \
 To Run The Application You Have To Press **More Info** And Then **Run Anyways**.
 
 # License
@@ -87,7 +87,7 @@ To Run The Application You Have To Press **More Info** And Then **Run Anyways**.
 
 # Trademark Notice
 
-**“AutoClicker” is developed by zSynctic.**
+**“AutoClicker” or "zClicker" is developed by zSynctic.**
 **The name, branding, and identity of this project may not be used for modified or redistributed versions without explicit permission.** 
 
 © zSynctic
