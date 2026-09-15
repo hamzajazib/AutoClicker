@@ -1,102 +1,106 @@
-<img width="1705" height="1007" alt="Screenshot 2026-09-15 170755" src="https://github.com/user-attachments/assets/33bca975-20a6-44cd-8c5d-35b8ebdaac89" />
+<p align="center">
+  <img width="1705" height="1007" alt="ZClicker Pro feature overview" src="https://github.com/user-attachments/assets/33bca975-20a6-44cd-8c5d-35b8ebdaac89" />
+</p>
 
+<h1 align="center">ZClicker</h1>
 
 <p align="center">
-  <strong>🚀 This is ZClicker Pro — unlock powerful features like background window clicking</strong>
+  A fast, modern, and easy-to-use Windows mouse and keyboard autoclicker.
 </p>
 
 <p align="center">
+  <a href="https://github.com/zSynctic/AutoClicker/releases/latest">
+    <img alt="Latest GitHub release" src="https://img.shields.io/github/v/release/zSynctic/AutoClicker?display_name=release&label=Windows&logo=windows&logoColor=white&style=for-the-badge" />
+  </a>
   <a href="https://zclicker.com">
-    <img src="https://capsule-render.vercel.app/api?type=rect&color=2f6fff&height=120&section=header&text=🚀%20Get%20ZClicker%20Pro&fontSize=58&fontColor=ffffff&animation=fadeIn" width="700"/>
+    <img alt="ZClicker website" src="https://img.shields.io/badge/Explore_ZClicker_Pro-1F6AA5?style=for-the-badge&logo=rocket&logoColor=white" />
   </a>
 </p>
 
----
+<p align="center">
+  <a href="https://zclicker.com">Website</a> •
+  <a href="https://github.com/zSynctic/AutoClicker/releases">Releases</a> •
+  <a href="CHANGELOG.md">Changelog</a>
+</p>
 
-🌐 **Website:** https://zclicker.com
+## Download ZClicker Free
 
----
+- [Download from GitHub](https://github.com/zSynctic/AutoClicker/releases/download/v1.1.0/AutoClicker-1.1.0.exe)
+- [Download from SourceForge](https://sourceforge.net/projects/autoclickersync/files/v1.1.0/AutoClicker-1.1.0.exe/download)
 
-# What is this AutoClicker?
+ZClicker is portable—download the executable and run it. No installation is required.
 
-**ZClicker (AutoClicker) is a modern open source program that can automatically click and hold mouse buttons or press keyboard keys with speed and precision.**
+### SHA-256
 
-The free version provides essential autoclicking features, while **ZClicker Pro** unlocks advanced functionality such as background window clicking and more control.
+```text
+fb5e4dc3404454e8c93ef659fdd4e047d149d8589c2e64ad55a1078ab5ac71a8
+```
 
-# Why use this AutoClicker?
+## What is ZClicker?
 
-**Bored of the old-looking AutoClickers here is a powerful easy-to-use AutoClicker with many features and a Modern GUI!** <br />
+ZClicker is a lightweight Windows autoclicker that can automatically click mouse buttons, hold them down, or repeatedly press keyboard keys. Its interface is designed to stay small, clear, and quick to use.
 
-**This is a simple easy-to-use user-friendly fully-fledged AutoClicker that can automatically click the mouse and keyboard so fast and hold the mouse button down and has many other features!** <br />
+## Free Features
 
-**More updates are on the way!**
+- Fast mouse and keyboard autoclicking
+- Left, middle, and right mouse-button support
+- Custom keyboard-key input
+- Single, double, triple, and hold modes
+- Repeat-count and repeat-until-stopped modes
+- Configurable click interval
+- Global F5 start and stop hotkey
+- Clean, compact interface
+- Automatic notifications for future updates
+- No advertisements or bundled software
 
-## Installation
+The Free interface also includes previews of the advanced tools available in ZClicker Pro.
 
-### [<img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/zSynctic/AutoClicker?display_name=release&label=Windows&logo=Windows&logoColor=019df4&style=for-the-badge" width="350">](https://github.com/zSynctic/AutoClicker/releases/download/v1.0.6/AutoClicker-1.0.6.exe)
+## ZClicker Pro
 
-### [![Download AutoClicker](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/autoclickersync/files/v1.0.6/AutoClicker-1.0.6.exe/download)
+ZClicker Pro expands the standard clicker into a more complete automation toolkit:
 
-### Don't forget to give a ⭐!
+- Background Window Clicker
+- Precise Click Position clicking
+- Macro Recorder for mouse and keyboard actions
+- Visual macro action timeline and editor
+- Count, Toggle, and While Held playback modes
+- Adjustable macro playback speed and timing
+- Reusable Presets for complete clicker setups and macros
+- Customizable recording and playback hotkeys
+- Dark, Light, and System appearance modes
+- Always-on-top behavior and CPS Test
+- Universal Esc emergency stop
+- Automatic update notifications with release notes
 
-# How to use?
+Visit [zclicker.com](https://zclicker.com) to learn more about ZClicker Pro.
 
-**First choose the button you want to be clicking from the menu or you can even type one that isn't in the menu like keyboard keys for example: W, choose your clicking type then press F5 or press the start button to start the autoclicking then stop it by pressing F5 again or by pressing the button.**
+## How to Use
 
-# Examples
-![Image1](https://github.com/zSynctic/AutoClicker/assets/71632495/63d22fcf-09aa-49d9-9d78-be9f3af466b1)  ![Image2](https://github.com/zSynctic/AutoClicker/assets/71632495/6c91bf26-8790-4ded-877a-ee075ad481cc) 
+1. Choose a mouse button or enter a keyboard key.
+2. Select Single, Double, Triple, or Hold.
+3. Choose a repeat mode and click interval.
+4. Press **F5** or select **Start** to begin.
+5. Press **F5** again or select **Stop** to stop.
 
-# Features
+## Windows SmartScreen
 
-- Ultra Fast autoclicking
-- Free and Open Source <br />
-- Fully-Fledged AutoClicker <br />
-- Choose between which mouse button or keyboard button to click as <br />
-- Hold the mouse button down <br />
-- No advertisements <br />
-- Convenient - Hotkey work while application is in background <br />
-- Simple Clean Small and modern interface <br />
-- Choose between single clicking, double clicking and triple clicking <br />
-- 0% CPU Usage <br />
-- Low Ram Usage <br />
-- Set the click interval <br />
-- Set how many times you want to repeat <br />
-- Virus Free
+Windows may display a SmartScreen warning because ZClicker is not currently code-signed. If you downloaded it from the official GitHub or SourceForge page, select **More info**, then **Run anyway**.
 
-# ZClicker Pro
+## Support Development
 
-Unlock advanced features:
+Purchasing [ZClicker Pro](https://zclicker.com) through the official website helps support continued updates, development, and website hosting.
 
-- Background Window Clicking
-- Click Position Clicking
-- Customizable Hotkeys
-- Advanced control for multitasking
+## License
 
-### 🚀 Get ZClicker Pro
+Copyright © 2026 zSynctic.
 
-<a href="https://zclicker.com">
-  <img src="https://capsule-render.vercel.app/api?type=rect&color=2f6fff&height=120&section=header&text=🚀%20Get%20ZClicker%20Pro&fontSize=58&fontColor=ffffff&animation=fadeIn" width="700"/>
-</a>
+The Free source code in this repository is licensed under the [GNU General Public License v3.0](LICENSE).
 
-*Warning: When running AutoClicker.exe or zClicker.exe a Blue Window Might Popup.* \
-To Run The Application You Have To Press **More Info** And Then **Run Anyways**.
+## Trademark Notice
 
-# License
+ZClicker is developed by zSynctic. The ZClicker name, branding, and visual identity may not be used to imply endorsement of modified or redistributed versions.
 
-**Copyright (c) 2026 zSynctic**
-**This project is licensed under the GNU General Public License v3.0.**
-
-# Trademark Notice
-
-**“AutoClicker” or "zClicker" is developed by zSynctic.**
-**The name, branding, and identity of this project may not be used for modified or redistributed versions without explicit permission.** 
-
-© zSynctic
-
-<a href="https://www.buymeacoffee.com/zsynctic" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/arial-blue.png" alt="Buy Me A Coffee" style="height: 58px !important;width: 217px !important;" ></a>
-
-<br>
-
-![Github - Downloads](https://img.shields.io/github/downloads/zSynctic/Autoclicker/total?label=Github%20Downloads)
-![SourceForge - Downloads](https://img.shields.io/sourceforge/dt/autoclickersync?label=SourceForge%20Downloads)
-
+<p align="center">
+  <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/zSynctic/AutoClicker/total?label=GitHub%20Downloads" />
+  <img alt="SourceForge downloads" src="https://img.shields.io/sourceforge/dt/autoclickersync?label=SourceForge%20Downloads" />
+</p>

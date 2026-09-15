@@ -1,8 +1,8 @@
 # Author: Synctic
 # License: GPL-3.0 | Copyright (c) 2022 Synctic
-# Version: 1.06
+# Version: 1.1.0
 
-from PIL import ImageTk
+from PIL import Image, ImageTk
 from CTkToolTip import *
 from pynput.keyboard import *
 from pynput.keyboard import Key, Listener
@@ -15,7 +15,15 @@ import os
 import pydirectinput
 import customtkinter
 import threading
+import json
+import queue
+import re
+import urllib.request
 import spinbox as spinbox
+
+APP_VERSION = "1.1.0"
+UPDATE_INFO_URL = "https://zclicker.com/api/zclicker-free/latest"
+UPDATE_CHECK_INTERVAL_SECONDS = 72 * 60 * 60
 
 autoclick_key = Key.f5
 
@@ -29,7 +37,7 @@ class App(customtkinter.CTk):
     auto1 = False
 
     WIDTH = 315
-    HEIGHT = 455
+    HEIGHT = 500
 
     global resource
 
@@ -56,6 +64,8 @@ class App(customtkinter.CTk):
         self.iconphoto(False, self.p1)
         
         self.pause = False
+        self.update_result_queue = queue.Queue()
+        self.update_check_thread = None
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -110,24 +120,227 @@ By zSynctic""",
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
+        def show_premium_popup(feature_name):
+            feature_benefits = {
+                "Background Window Clicker": (
+                    "Keep clicking a selected window while you work elsewhere."
+                ),
+                "Click Position": (
+                    "Choose an exact screen position for every automated click."
+                ),
+                "Settings": (
+                    "Customize your hotkey, appearance, and always-on-top behavior."
+                ),
+                "CPS Test": (
+                    "Measure your clicking speed and track your clicks per second."
+                ),
+                "Macro Recorder": (
+                    "Record, edit, save, and replay complete mouse and keyboard workflows."
+                ),
+                "Presets": (
+                    "Save multiple clicking setups and macros as reusable presets."
+                ),
+            }
+
+            if (
+                hasattr(self, "premium_popup")
+                and self.premium_popup.winfo_exists()
+            ):
+                self.premium_popup.focus_force()
+                return
+
+            self.premium_popup = customtkinter.CTkToplevel(self)
+            self.premium_popup.title("Premium Feature")
+            self.premium_popup.geometry("420x360")
+            self.premium_popup.resizable(False, False)
+            self.premium_popup.configure(fg_color="#242424")
+            self.premium_popup.transient(self)
+            self.premium_popup.grab_set()
+            self.premium_popup.after(
+                200,
+                lambda: self.premium_popup.iconbitmap(
+                    resource("Assets/icon.ico")
+                ),
+            )
+
+            self.premium_popup.update_idletasks()
+            popup_x = (self.premium_popup.winfo_screenwidth() - 420) // 2
+            popup_y = (self.premium_popup.winfo_screenheight() - 360) // 2
+            self.premium_popup.geometry(f"+{popup_x}+{popup_y}")
+
+            premium_card = customtkinter.CTkFrame(
+                master=self.premium_popup,
+                fg_color="#2B2B2B",
+                corner_radius=10,
+            )
+            premium_card.pack(fill="both", expand=True, padx=18, pady=18)
+
+            premium_title = customtkinter.CTkLabel(
+                master=premium_card,
+                text="🔒 Premium Feature",
+                font=("Roboto Medium", -20, "bold"),
+                text_color="white",
+            )
+            premium_title.pack(pady=(18, 8))
+
+            premium_message = customtkinter.CTkLabel(
+                master=premium_card,
+                text=(
+                    f"{feature_benefits[feature_name]}\n\n"
+                    "Available in ZClicker Pro with a simple\n"
+                    "one-time payment."
+                ),
+                font=("Roboto Medium", -14),
+                text_color="#B9B9B9",
+                justify="center",
+                wraplength=340,
+            )
+            premium_message.pack(pady=(0, 12))
+
+            support_message = customtkinter.CTkLabel(
+                master=premium_card,
+                text="Purchases help support continued updates and website hosting.",
+                font=("Roboto Medium", -11),
+                text_color="#858585",
+                justify="center",
+                wraplength=340,
+            )
+            support_message.pack(pady=(0, 14))
+
+            def open_zclicker_pro():
+                webbrowser.open("https://zclicker.com")
+                self.premium_popup.destroy()
+
+            premium_upgrade_button = customtkinter.CTkButton(
+                master=premium_card,
+                text="🚀 Get ZClicker Pro",
+                width=310,
+                height=42,
+                fg_color="#1F6AA5",
+                hover_color="#144870",
+                corner_radius=6,
+                font=("Roboto Medium", -15, "bold"),
+                cursor="hand2",
+                command=open_zclicker_pro,
+            )
+            premium_upgrade_button.pack(pady=(0, 10))
+
+            maybe_later_button = customtkinter.CTkButton(
+                master=premium_card,
+                text="Maybe Later",
+                width=310,
+                height=42,
+                fg_color="#242424",
+                hover_color="#2B2B2B",
+                border_width=1,
+                border_color="#949A9F",
+                text_color="white",
+                corner_radius=6,
+                command=self.premium_popup.destroy,
+            )
+            maybe_later_button.pack(pady=(0, 18))
+
+            self.premium_popup.protocol(
+                "WM_DELETE_WINDOW", self.premium_popup.destroy
+            )
+            self.premium_popup.focus_force()
+
+        self.settings_image = customtkinter.CTkImage(
+            dark_image=Image.open(resource("Assets/darksettings.png")),
+            light_image=Image.open(resource("Assets/lightsettings.png")),
+            size=(20, 20),
+        )
+
+        self.cps_image = customtkinter.CTkImage(
+            dark_image=Image.open(resource("Assets/darkclick.png")),
+            light_image=Image.open(resource("Assets/lightclick.png")),
+            size=(20, 20),
+        )
+
         self.start_auto_button = customtkinter.CTkButton(
             master=self.frame,
             text="Start",
-            fg_color=("black"),
+            width=123,
+            height=36,
+            fg_color="#1F6AA5",
+            hover_color="#2878B5",
+            text_color="white",
             font=("Roboto Medium", -16),
             command=self.start_button,
         )
-        self.start_auto_button.place(x=80, y=280)
+        self.start_auto_button.place(x=20, y=328)
 
         self.stop_auto_button = customtkinter.CTkButton(
             master=self.frame,
             text="Stop",
-            fg_color=("black"),
-            font=("Roboto Medium", -16),
+            width=123,
+            height=36,
+            fg_color="#242424",
+            hover_color="#2B2B2B",
+            border_color="#949A9F",
+            border_width=1,
+            text_color="white",
+            font=("Roboto Medium", -15),
             state="disabled",
             command=self.stop_button,
         )
-        self.stop_auto_button.place(x=80, y=315)
+        self.stop_auto_button.place(x=152, y=328)
+
+        self.click_position_button = customtkinter.CTkButton(
+            master=self.frame,
+            text="Click Position 🔒",
+            width=255,
+            height=32,
+            fg_color="#242424",
+            border_color="#949A9F",
+            border_width=1,
+            font=("Roboto Medium", -14),
+            cursor="hand2",
+            command=lambda: show_premium_popup("Click Position"),
+        )
+        self.click_position_button.place(x=20, y=200)
+
+        self.background_click_button = customtkinter.CTkButton(
+            master=self.frame,
+            text="Background Window Clicker 🔒",
+            width=255,
+            height=32,
+            fg_color="#242424",
+            border_color="#949A9F",
+            border_width=1,
+            font=("Roboto Medium", -14),
+            cursor="hand2",
+            command=lambda: show_premium_popup("Background Window Clicker"),
+        )
+        self.background_click_button.place(x=20, y=240)
+
+        self.macro_recorder_button = customtkinter.CTkButton(
+            master=self.frame,
+            text="Macro Recorder 🔒",
+            width=123,
+            height=32,
+            fg_color="#242424",
+            border_color="#949A9F",
+            border_width=1,
+            font=("Roboto Medium", -12),
+            cursor="hand2",
+            command=lambda: show_premium_popup("Macro Recorder"),
+        )
+        self.macro_recorder_button.place(x=20, y=280)
+
+        self.profiles_button = customtkinter.CTkButton(
+            master=self.frame,
+            text="Presets 🔒",
+            width=123,
+            height=32,
+            fg_color="#242424",
+            border_color="#949A9F",
+            border_width=1,
+            font=("Roboto Medium", -13),
+            cursor="hand2",
+            command=lambda: show_premium_popup("Presets"),
+        )
+        self.profiles_button.place(x=152, y=280)
 
         self.buttonmenu_var = customtkinter.StringVar(value="Left")
 
@@ -179,32 +392,72 @@ By zSynctic""",
             width=80,
             textvariable=self.clickinterval_var,
         )
-        self.clickinterval.place(x=110, y=380)
+        self.clickinterval.place(x=110, y=411)
 
         self.clickintervaltxt = customtkinter.CTkLabel(
             master=self.frame, text="Click interval", font=("Roboto Medium", -14)
         )
-        self.clickintervaltxt.place(x=108, y=350)
+        self.clickintervaltxt.place(x=108, y=382)
 
         self.secondstxt = customtkinter.CTkLabel(
             master=self.frame, text="secs", font=("Roboto Medium", -13), width=10
         )
-        self.secondstxt.place(x=195, y=385)
-        
+        self.secondstxt.place(x=195, y=416)
+
         self.upgrade_btn = customtkinter.CTkButton(
             master=self.frame,
             text="Upgrade to Pro",
-            width=140,
-            height=26,
+            width=160,
+            height=25,
             fg_color="transparent",
             bg_color="transparent",
             hover_color="#2B2B2B",
             text_color="#1F6AA5",
             font=("Roboto Condensed", -13, "underline"),
             cursor="hand2",
-            command=lambda: webbrowser.open_new_tab("https://ZClicker.com"),
+            command=lambda: webbrowser.open_new_tab("https://zclicker.com"),
         )
-        self.upgrade_btn.place(x=81, y=408)
+        self.upgrade_btn.place(x=68, y=448)
+
+        self.settings_button = customtkinter.CTkButton(
+            master=self.frame,
+            text="",
+            image=self.settings_image,
+            width=20,
+            height=20,
+            bg_color="transparent",
+            fg_color="transparent",
+            hover_color="#2B2B2B",
+            cursor="hand2",
+            command=lambda: show_premium_popup("Settings"),
+        )
+        self.settings_button.place(x=0, y=447)
+
+        self.settings_tooltip = CTkToolTip(
+            widget=self.settings_button,
+            message="Settings 🔒",
+            delay=0,
+        )
+
+        self.cps_test_button = customtkinter.CTkButton(
+            master=self.frame,
+            text="",
+            image=self.cps_image,
+            width=20,
+            height=20,
+            bg_color="transparent",
+            fg_color="transparent",
+            hover_color="#2B2B2B",
+            cursor="hand2",
+            command=lambda: show_premium_popup("CPS Test"),
+        )
+        self.cps_test_button.place(x=258, y=445)
+
+        self.cps_tooltip = CTkToolTip(
+            widget=self.cps_test_button,
+            message="CPS Test 🔒",
+            delay=0,
+        )
 
         self.repeat_var = customtkinter.IntVar()
         self.repeat_var.set(value=1)
@@ -243,6 +496,7 @@ By zSynctic""",
 
         self.repeattimes.set(1)
         self.repeatstopped.select()
+        self.after(1500, self.check_for_updates)
 
     def buttonmenu_event(self, choice5):
         global button1
@@ -514,6 +768,167 @@ By zSynctic""",
         self.buttonmenu.configure(state="normal")
         self.start_auto_button.configure(state="enabled")
         self.stop_auto_button.configure(state="disabled")
+
+    @staticmethod
+    def version_parts(version):
+        numbers = [int(part) for part in re.findall(r"\d+", str(version))[:4]]
+        return tuple(numbers + [0] * (4 - len(numbers)))
+
+    @staticmethod
+    def update_state_path():
+        base_path = os.getenv("LOCALAPPDATA") or os.path.expanduser("~")
+        return os.path.join(base_path, "ZClicker", "Free", "update_state.json")
+
+    def update_check_due(self):
+        try:
+            with open(self.update_state_path(), "r", encoding="utf-8") as state_file:
+                last_check = float(json.load(state_file).get("last_update_check", 0))
+        except (OSError, ValueError, TypeError, AttributeError):
+            last_check = 0
+
+        return time.time() - last_check >= UPDATE_CHECK_INTERVAL_SECONDS
+
+    def record_update_check(self):
+        try:
+            state_path = self.update_state_path()
+            os.makedirs(os.path.dirname(state_path), exist_ok=True)
+            with open(state_path, "w", encoding="utf-8") as state_file:
+                json.dump({"last_update_check": int(time.time())}, state_file)
+        except OSError:
+            pass
+
+    def check_for_updates(self):
+        if not self.update_check_due():
+            return
+
+        # Record the attempt first so an offline computer does not retry on every launch.
+        self.record_update_check()
+        self.update_check_thread = threading.Thread(
+            target=self.fetch_update_information,
+            daemon=True,
+        )
+        self.update_check_thread.start()
+        self.after(150, self.poll_update_result)
+
+    def fetch_update_information(self):
+        try:
+            request = urllib.request.Request(
+                UPDATE_INFO_URL,
+                headers={"User-Agent": f"ZClicker-Free/{APP_VERSION}"},
+            )
+            with urllib.request.urlopen(request, timeout=4) as response:
+                update_info = json.loads(response.read().decode("utf-8"))
+
+            latest_version = str(update_info.get("version", "")).strip()
+            if not latest_version or (
+                self.version_parts(latest_version) <= self.version_parts(APP_VERSION)
+            ):
+                return
+
+            release_notes = update_info.get("release_notes", [])
+            if not isinstance(release_notes, list):
+                release_notes = []
+            release_notes = [str(note) for note in release_notes[:6]]
+            download_url = str(update_info.get("download_url", "")).strip()
+            if not download_url.startswith(("https://", "http://")):
+                return
+
+            self.update_result_queue.put(
+                (latest_version, release_notes, download_url)
+            )
+        except (OSError, ValueError, TypeError):
+            # Update checks must never delay or prevent the clicker from opening.
+            return
+
+    def poll_update_result(self):
+        try:
+            update_result = self.update_result_queue.get_nowait()
+        except queue.Empty:
+            if self.update_check_thread and self.update_check_thread.is_alive():
+                self.after(150, self.poll_update_result)
+            return
+
+        self.show_update_available(*update_result)
+
+    def show_update_available(self, latest_version, release_notes, download_url):
+        if hasattr(self, "update_window") and self.update_window.winfo_exists():
+            self.update_window.focus_force()
+            return
+
+        self.update_window = customtkinter.CTkToplevel(self)
+        self.update_window.title("ZClicker Update")
+        self.update_window.geometry("420x390")
+        self.update_window.resizable(False, False)
+        self.update_window.configure(fg_color="#242424")
+        self.update_window.transient(self)
+        self.update_window.grab_set()
+        self.update_window.after(
+            200,
+            lambda: self.update_window.iconbitmap(resource("Assets/icon.ico")),
+        )
+
+        update_card = customtkinter.CTkFrame(
+            self.update_window,
+            fg_color="#2B2B2B",
+            corner_radius=10,
+        )
+        update_card.pack(fill="both", expand=True, padx=18, pady=18)
+
+        customtkinter.CTkLabel(
+            update_card,
+            text="Update Available",
+            font=("Roboto Medium", -21, "bold"),
+        ).pack(pady=(20, 5))
+
+        customtkinter.CTkLabel(
+            update_card,
+            text=f"ZClicker {latest_version} is ready  •  Installed {APP_VERSION}",
+            font=("Roboto Medium", -13),
+            text_color="#B9B9B9",
+        ).pack(pady=(0, 14))
+
+        notes_text = "\n".join(f"• {note}" for note in release_notes)
+        if not notes_text:
+            notes_text = "A newer version of ZClicker is available."
+        customtkinter.CTkLabel(
+            update_card,
+            text=notes_text,
+            justify="left",
+            anchor="w",
+            wraplength=330,
+            font=("Roboto Medium", -12),
+            text_color="#D0D0D0",
+        ).pack(fill="x", padx=26, pady=(0, 16))
+
+        def download_update():
+            webbrowser.open(download_url)
+            self.update_window.destroy()
+
+        customtkinter.CTkButton(
+            update_card,
+            text="Download Update",
+            width=310,
+            height=42,
+            fg_color="#1F6AA5",
+            hover_color="#144870",
+            font=("Roboto Medium", -14, "bold"),
+            cursor="hand2",
+            command=download_update,
+        ).pack(pady=(0, 10))
+
+        customtkinter.CTkButton(
+            update_card,
+            text="Maybe Later",
+            width=310,
+            height=42,
+            fg_color="#242424",
+            hover_color="#333333",
+            border_width=1,
+            border_color="#949A9F",
+            command=self.update_window.destroy,
+        ).pack(pady=(0, 18))
+
+        self.update_window.focus_force()
 
     def on_close(self, event=0):
         self.destroy()
